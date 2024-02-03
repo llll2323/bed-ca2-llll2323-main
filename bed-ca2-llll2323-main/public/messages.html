@@ -1,0 +1,108 @@
+<html>
+    <head>
+        <script>
+            function generateMessage() {
+                var myHeaders = new Headers();
+                myHeaders.append("Authorization", "Bearer " + localStorage["token"]);
+    
+                var requestOptions = {
+                    method: 'GET',
+                    headers: myHeaders,
+                    redirect: 'follow'
+                };
+    
+                fetch("http://localhost:3000/message", requestOptions)
+                    .then(response => response.json())
+                    .then(result => {
+                        console.log(result);
+                        if (result.name) {
+                            // delete localStorage["token"];
+                            // window.location.href = "login.html";
+                        } else {
+                            // alert("token is valid");
+                            div_username.innerHTML = "Welcome user id: " + localStorage["user_id"];
+                            div_messages.innerHTML = "";
+                            result.forEach(message => {
+                                div_messages.innerHTML += '<div class="message"><span id="span_username">' + message.user_id + ': </span><span id="span_message">' + message.message_text + '</span></div>'
+                            })
+                        }
+                    })
+                    .catch(error => {
+                        // console.log('error', error);
+                        // delete localStorage["token"];
+                        // window.location.href = "login.html";
+                    });
+            }
+    
+            document.addEventListener("DOMContentLoaded", () => {
+                generateMessage();
+    
+                btn_send.onclick = (evt) => {
+                    var myHeaders = new Headers();
+                    myHeaders.append("Content-Type", "application/json");
+                    myHeaders.append("Authorization", "Bearer " + localStorage["token"]);
+    
+                    var raw = JSON.stringify({
+                        "message_text": tf_message.value,
+                        "user_id": localStorage["user_id"]
+                    });
+    
+                    var requestOptions = {
+                        method: 'POST',
+                        headers: myHeaders,
+                        body: raw,
+                        redirect: 'follow'
+                    };
+    
+                    fetch("http://localhost:3000/message", requestOptions)
+                        .then(response => response.json())
+                        .then(result => {
+                            generateMessage();
+                            tf_message.value = "";
+                        })
+                        .catch(error => console.log('error', error));
+                }
+            });
+        </script>
+        <style>
+            #div_username {
+                font-weight: 800;
+                border: 2px solid black;
+            }
+    
+            #message_box {
+                vertical-align: bottom;
+            }
+    
+            #tf_message {
+                width: 90%;
+            }
+    
+            #btn_send {
+                width: 8%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="div_username">
+            Username Placeholder
+        </div>
+        <div id="div_messages">
+            <div class="message">
+                <span id="span_username">Username 1</span>
+                <span id="span_message">Message 1</span>
+            </div>
+            <div class="message">
+                <span id="span_username">Username 2</span>
+                <span id="span_message">Message 2</span>
+            </div>
+        </div>
+    
+        <div class="message_box">
+            <input id="tf_message" type="text">
+            <button id="btn_send">SEND</button>
+        </div>
+    
+    
+    </body>
+</html>
